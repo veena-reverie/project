@@ -6,7 +6,7 @@ def extract_normal_date(string):
     final_date_list=[]
 
     try:
-        pattern='\d{1,2}[\.\/-]\d{1,2}[\.\/-]\d{2,4}'
+        pattern='\d{1,2}\s?[\.\/-]\s?\d{1,2}\s?[\.\/-]\s?\d{2,4}'
         date_list = re.findall(pattern, string)
         new_string=string
         for date_item in date_list:
