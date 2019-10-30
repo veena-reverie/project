@@ -3,43 +3,50 @@ import re
 import numpy as np
 import dateparser
 from dateutil.parser import parse
+
 months=['january','february','march','april','may','june','july','august','september','october','november','december',
-    'jan','feb','mar','apr','may','june','july','aug','sep','oct','nov','dec','janavarI','FParavarI','mArca','aprYEla','maI','jUna','julAI','agasta','sitxbara','akTUbara','navxbara','disxbara','janavari',
-'Pibravari','mArci','Epril','mE','jUn','jUlYE','AgasTu','sepTexbar','akTObar','navxbar','Disexbar','AgasT']
-months_hin={'janavarI':'january','FParavarI':'february','mArca':'march','aprYEla':'april','maI':'may','jUna':'june','julAI':'july','agasta':'august','sitxbara':'september','akTUbara':'october','navxbara':'november','disxbara':'december'}
-months_tel={'janavari':'january','Pibravari':'february','mArci':'march','Epril':'april','mE':'may','jUn':'june','jUlYE':'july','AgasTu':'august','AgasT':'august','sepTexbar':'september','akTObar':'october','navxbar':'november','Disexbar':'december'}
+        'jan','feb','mar','apr','may','june','july','aug','sep','oct','nov','dec','janavarI','FParavarI','mArca','aprYEla',
+        'maI','jUna','julAI','agasta','sitxbara','akTUbara','navxbara','disxbara','janavari','Pibravari','mArci','Epril',
+        'mE','jUn','jUlYE','AgasTu','sepTexbar','akTObar','navxbar','Disexbar','AgasT']
+
+months_hin={'janavarI':'january','FParavarI':'february','mArca':'march','aprYEla':'april','maI':'may','jUna':'june',
+            'julAI':'july','agasta':'august','sitxbara':'september','akTUbara':'october','navxbara':'november','disxbara':'december'}
+
+months_tel={'janavari':'january','Pibravari':'february','mArci':'march','Epril':'april','mE':'may','jUn':'june','jUlYE':'july',
+            'AgasTu':'august','AgasT':'august','sepTexbar':'september','akTObar':'october','navxbar':'november','Disexbar':'december'}
+
 def checkConsecutive(l):
     n = len(l) - 1
     return (sum(np.diff(sorted(l)) == 1) >= n)
 
 def extract_month(s):
-    mon=''
-    pos=''
+    mon = ''
+    pos = ''
     for i,token in enumerate(s):
         if token in months:
-            mon=token
-            pos=i
+            mon = token
+            pos = i
             break
         else:
             continue
-    if mon!='':
+    if mon != '':
         return mon,pos
     else:
         return None,None
 
 def extract_date_wd_month(s,lang):
-    normal_string=s
-    if lang=='english':
+    normal_string = s
+    if lang == 'english':
         s = s.lower().strip('\n').split()
     else:
         s = s.split()
     date_list = []
-    mon,pos=extract_month(s)
-    if mon!=None:
-        if lang=='hindi':
-            mon=months_hin[mon]
-        elif lang=='telugu':
-            mon=months_tel[mon]
+    mon,pos = extract_month(s)
+    if mon != None:
+        if lang == 'hindi':
+            mon = months_hin[mon]
+        elif lang == 'telugu':
+            mon = months_tel[mon]
 
         date_list.append((mon,pos))
         for ind,item in enumerate(s):
@@ -54,21 +61,21 @@ def extract_date_wd_month(s,lang):
 
 
         date_list.sort(key = lambda x: x[1])
-        lst=[]
-        value_lst=[]
+        lst = []
+        value_lst = []
         for item in date_list:
             lst.append(item[1])
             value_lst.append(item[0])
-        bvalue=checkConsecutive(lst)
+        bvalue = checkConsecutive(lst)
         if bvalue:
-            value=" ".join(value_lst)
-            if lang=='english':
-                rem_string=normal_string.split(value)
+            value = " ".join(value_lst)
+            if lang == 'english':
+                rem_string = normal_string.split(value)
             else:
-                value_new=' '.join(s[i] for i in lst)
-                rem_string=normal_string.split(value_new)
+                value_new = ' '.join(s[i] for i in lst)
+                rem_string = normal_string.split(value_new)
             try:
-                date_value=parse(value)
+                date_value = parse(value)
                 return(date_value.strftime('%d/%m/%Y'),rem_string)
             except:
                 return('Not valid Date','')
