@@ -31,3 +31,25 @@ please book a ticket for today 5 pm and 6 AM
 please cancel the ticket booked at yesterday morning 9 am
 please book a seat for wednesday 12 PM
 book a restaurant for thursday ten PM
+please book a ticket after 15 minutes
+
+
+
+
+
+# time_dict_eng = {'am' : 'AM','pm' : 'PM','o\'clock' : 'o\'clock'}
+# time_dict_hin = {'subaha':'AM','SAma':'PM','dOpahara':'PM','rAta':'PM'}
+
+# num_dict_eng={'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12}
+
+# num_dict_hin = {'Eka':'1','dO':'2','tIna':'3','cAra':'4','pAxca':'5','pAMca':'5','Caha':'6','sAta':'7',
+#               'AHTa':'8','nYO':'9','dasa':'10','gyAraha':'11','bAraha':'12','tEraha':'13','cYOdaha':'14',
+#               'pxdraha':'15', 'sOlaha':'16', 'satraha':'17', 'aHTAraha':'18','uxnIsa':'19',
+#               'bIsa':'20', 'ikIsa':'21', 'bAIsa':'22', 'tEisa':'23', 'cYObIsa':'24', 'paccIsa':'25',
+#               'CabbIsa':'26','satAisa':'27','aTHTAisa':'28','unatIsa':'29','tIsa':'30','ikatIsa':'31',
+#               'batIsa':'32','tYExtIsa':'33', 'cYOxtIsa':'34','pYExtIsa':'35','CatIsa':'36',
+#               'sYExtIsa':'37','aFdatIsa':'38','unatAlIsa':"39",'cAlIsa':'40','ikatAlIsa':'41',
+#               'bayAlIsa':'42','tYEtAlIsa':'43','cavAlIsa':'44','pYExtAlIsa':'45','CayAlisa':'46',
+#               'sYExtAlIsa':'47','aFdatAlIsa':'48','unacAsa':'49','pacAsa':'50','ikyAvana':'51',
+#               'bAvana':'52','tirapana':'53','cYOvana':'54','pacapana':'55','Cappana':'56',
+#               'satAvana':'57','aHTAvana':'58','unasaHTa':'59','sAHTa':'60'}

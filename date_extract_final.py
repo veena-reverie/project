@@ -2,7 +2,6 @@ from datetime import date,datetime
 from nltk.util import everygrams
 from date_month import extract_date_wd_month
 from date_normal import extract_normal_date
-import numpy as np
 from time_extract import time_extractor
 from dateutil.relativedelta import relativedelta, MO, TU, WE, TH, FR, SA, SU
 
@@ -165,7 +164,7 @@ if __name__ == '__main__':
             pass
         else:
             print('input_string:',s)
-            lang = 'hindi'
+            lang = 'english'
             d = date_extract(s,lang)
             t=time_extractor(s,lang)
 

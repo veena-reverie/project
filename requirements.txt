@@ -1,1 +1,4 @@
 dateparser
+numpy
+nltk
+word2number
