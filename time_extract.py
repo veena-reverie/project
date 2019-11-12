@@ -1,18 +1,20 @@
 import re
 from pathlib import Path
+from dateutil.relativedelta import relativedelta
+from datetime import datetime
 from enums import Language
 from collections import defaultdict
 def nested_dict():
     return defaultdict(nested_dict)
 
-languages=[Language.Hindi]
+languages=[Language.Hindi,Language.English]
 
 time_dict_new=nested_dict()
 num_dict_new=nested_dict()
 
 data_path = Path(Path(__file__).parent).parent / 'project'/'data'
-
-minute_dict={'pYOnE':'45','savA':'15','sAHDE':'30','sAHRE':'30'}
+relative_time_dict={'before':-1,'ago':-1,'after':+1}
+# minute_dict={'pYOnE':'45','savA':'15','sAHDE':'30','sAHRE':'30'}
 
 def get_key(string, lang):
     string = string.strip()
@@ -40,6 +42,27 @@ def load_time():
                 parts[lang.value] = parts[lang.value].lower()
 
             time_dict_new[lang][parts[lang.value]] = value
+def load_minute():
+    global minute_dict
+    f = data_path / 'minute_dict'
+    with open(f,encoding='utf-8') as fp:
+        lines = fp.readlines()
+    for line in lines:
+        if line.startswith("#"):
+            continue
+        parts = line.strip().split("\t")
+        if len(parts) < 13:
+            print("Tab Issue")
+            print(line)
+            continue
+        value = parts.pop(0)
+
+        for lang in languages:
+            if lang == Language.English:
+                parts[lang.value] = parts[lang.value].lower()
+
+            time_dict_new[lang][parts[lang.value]] = value
+
 def load_num():
     global num_dict_new
     f = data_path / 'num_dict'
@@ -66,6 +89,10 @@ def time_extractor(s,lang):
     load_time()
     load_num()
     time_list=[]
+    rel_flag=0
+    hr=00
+    min=00
+    sec=00
     if lang == 'english':
         s = s.lower().strip('\n')
         tl = re.finditer(r'([1-9][1 2]?\s?pm|[1-9][1 2]?\s?am)', s)
@@ -85,7 +112,7 @@ def time_extractor(s,lang):
                 else:
                     return (time_list)
 
-                if num in list(range(13)):
+                if int(num) in list(range(13)):
                     time_list.append(str(num) + ' ' + ele)
                 else:
                     return (time_list)
@@ -94,8 +121,37 @@ def time_extractor(s,lang):
                 next_word = s[ind + 1]
                 if re.match('1[0-2]|0?[1-9]:([0-5][0-9])?', next_word):
                     time_list.append(next_word)
+            elif ele == 'hour' or ele == 'hr' or ele == 'hours':
+                prev_word=s[ind-1]
+                if prev_word.isdigit():
+                    hr=prev_word
+                elif prev_word.isalpha():
+                    if prev_word == 'an' and s[ind-2]!='half':
+                        hr = '1'
+                    else:
+                        hr=num_dict_new[Language.English][prev_word]
 
-
+            elif ele =='minute' or ele == 'min' or ele=='minutes':
+                prev_word=s[ind-1]
+                if prev_word.isdigit():
+                    min=prev_word
+                elif prev_word.isalpha():
+                    min=num_dict_new[Language.English][prev_word]
+            elif ele =='seconds' or ele == 'sec' or ele=='seconds':
+                prev_word=s[ind-1]
+                if prev_word.isdigit():
+                    sec=prev_word
+                elif prev_word.isalpha():
+                    sec=num_dict_new[Language.English][prev_word]
+            elif ele in relative_time_dict.keys():
+                rel_ind=ind
+                rel_flag=1
+        if hr or min and rel_flag:
+            operator=relative_time_dict[s[rel_ind]]
+            current_time = datetime.now()
+            change = relativedelta(hours=operator*int(hr),minutes=operator*int(min),seconds=operator*int(sec))
+            final_time=(current_time+change).time().strftime('%I:%M:%S %p')
+            time_list.append(final_time)
     else:
         s = s.strip('\n').split()
         time_of_day=""
@@ -156,7 +212,7 @@ if __name__ == '__main__':
         else:
 
             print('input_string:',s)
-            lang = 'hindi'
+            lang = 'english'
 
             t = time_extractor(s,lang)
             print('time:',t)
