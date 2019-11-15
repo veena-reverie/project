@@ -4,17 +4,20 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from enums import Language
 from collections import defaultdict
+
+
 def nested_dict():
     return defaultdict(nested_dict)
 
-languages=[Language.Hindi,Language.English]
+
+languages = [Language.Hindi, Language.English, Language.Malayalam]
+lang_dict = {"english":Language.English,'hindi':Language.Hindi,'malayalam':Language.Malayalam}
 
 time_dict_new=nested_dict()
 num_dict_new=nested_dict()
-
+minute_dict=nested_dict()
 data_path = Path(Path(__file__).parent).parent / 'project'/'data'
-relative_time_dict={'before':-1,'ago':-1,'after':+1}
-# minute_dict={'pYOnE':'45','savA':'15','sAHDE':'30','sAHRE':'30'}
+relative_time_dict={'before':-1,'ago':-1,'after':+1,'bAda':+1,'pahalE':-1}
 
 def get_key(string, lang):
     string = string.strip()
@@ -61,7 +64,7 @@ def load_minute():
             if lang == Language.English:
                 parts[lang.value] = parts[lang.value].lower()
 
-            time_dict_new[lang][parts[lang.value]] = value
+            minute_dict[lang][parts[lang.value]] = value
 
 def load_num():
     global num_dict_new
@@ -88,11 +91,16 @@ def load_num():
 def time_extractor(s,lang):
     load_time()
     load_num()
+    load_minute()
     time_list=[]
     rel_flag=0
+    rel_ind=0
     hr=00
     min=00
     sec=00
+    final_time=''
+    lang_dic = lang_dict[lang]
+
     if lang == 'english':
         s = s.lower().strip('\n')
         tl = re.finditer(r'([1-9][1 2]?\s?pm|[1-9][1 2]?\s?am)', s)
@@ -101,11 +109,10 @@ def time_extractor(s,lang):
         s = s.split()
         num=''
         for ind, ele in enumerate(s):
-            if ele in time_dict_new[Language.English].keys():
+            if ele in time_dict_new[lang_dic].keys():
                 prev_word = s[ind - 1]
                 if prev_word.isalpha():
-                    num = num_dict_new[Language.English][prev_word]
-
+                    num = num_dict_new[lang_dic][prev_word]
                 elif ele == 'o\'clock':
                     if int(prev_word) in list(range(13)):
                         time_list.append(prev_word+ ' ' + ele)
@@ -129,20 +136,21 @@ def time_extractor(s,lang):
                     if prev_word == 'an' and s[ind-2]!='half':
                         hr = '1'
                     else:
-                        hr=num_dict_new[Language.English][prev_word]
+                        hr=num_dict_new[lang_dic][prev_word]
 
             elif ele =='minute' or ele == 'min' or ele=='minutes':
                 prev_word=s[ind-1]
                 if prev_word.isdigit():
                     min=prev_word
                 elif prev_word.isalpha():
-                    min=num_dict_new[Language.English][prev_word]
+                    min=num_dict_new[lang_dic][prev_word]
+
             elif ele =='seconds' or ele == 'sec' or ele=='seconds':
                 prev_word=s[ind-1]
                 if prev_word.isdigit():
                     sec=prev_word
                 elif prev_word.isalpha():
-                    sec=num_dict_new[Language.English][prev_word]
+                    sec=num_dict_new[lang_dic][prev_word]
             elif ele in relative_time_dict.keys():
                 rel_ind=ind
                 rel_flag=1
@@ -153,53 +161,67 @@ def time_extractor(s,lang):
             final_time=(current_time+change).time().strftime('%I:%M:%S %p')
             time_list.append(final_time)
     else:
+        lang_dic=lang_dict[lang]
         s = s.strip('\n').split()
         time_of_day=""
-        num=''
+        num='00'
         min='00'
         for ind,item in enumerate(s):
-            if item in time_dict_new[Language.Hindi].keys():
-                time_of_day=time_dict_new[Language.Hindi][item]
+            if item in time_dict_new[lang_dic].keys():
+                time_of_day=time_dict_new[lang_dic][item]
 
-            elif item in minute_dict.keys():
-
-                min = minute_dict[item]
+            elif item in minute_dict[lang_dic].keys():
+                min = minute_dict[lang_dic][item]
                 try:
                     next_word=s[ind+1]
-                    if next_word in num_dict_new[Language.Hindi].keys():
-                        num = num_dict_new[Language.Hindi][next_word]
-                        if item=='pYOnE':
+                    if next_word in num_dict_new[lang_dic].keys():
+                        num = num_dict_new[lang_dic][next_word]
+                        if item == 'pYOnE':
                             if num == '1':
-                                num='12'
+                                num = '12'
                             else:
-                                num=str(int(num)-1)
+                                num = str(int(num)-1)
                         else:
-                            num=num
+                            num = num
                 except:
                     return ''
 
-            elif item == 'bajE' and num=='' and lang=='hindi':
-                prev_word=s[ind-1]
-                if prev_word in num_dict_new[Language.Hindi].keys():
-                    num=num_dict_new[Language.Hindi][prev_word]
+            elif item == 'bajE' and num == '00' and lang == 'hindi':
+                prev_word = s[ind-1]
+                if prev_word in num_dict_new[lang_dic].keys():
+                    num = num_dict_new[lang_dic][prev_word]
 
             elif item == 'bajakara' and lang=='hindi':
-                try:
-                    if s[ind+2] == 'minaTa':
-                        prev_word=s[ind-1]
-                        prev_word_num=num_dict_new[Language.Hindi][prev_word]
-                        next_word=s[ind+1]
-                        next_word_num=num_dict_new[Language.Hindi][next_word]
-                        num=prev_word_num
-                        min=next_word_num
-                except:
-                    return ''
+                prev_word = s[ind - 1]
+                num = num_dict_new[lang_dic][prev_word]
+
+            elif item == 'GxTA' and lang == 'hindi':
+                prev_word = s[ind - 1]
+                hr = num_dict_new[lang_dic][prev_word]
+
+            elif item == 'minaTa' and lang == 'hindi':
+                prev_word = s[ind-1]
+                min = num_dict_new[lang_dic][prev_word]
+            elif item in relative_time_dict.keys():
+                rel_ind = ind
+                rel_flag = 1
+        if rel_flag!=0 :
+            operator = relative_time_dict[s[rel_ind]]
+            current_time = datetime.now()
+            change = relativedelta(hours=operator*int(hr),minutes=operator*int(min),seconds=operator*int(sec))
+            final_time = (current_time+change).time().strftime('%I:%M:%S %p')
+            time_list.append(final_time)
+
+
         if min=='':
             min='00'
-        full_time_string=num+':'+min+' '+time_of_day
-        full_time_string.replace("  "," ")
-        time_list.append(full_time_string.strip())
+        if final_time=='':
+            full_time_string=num+':'+min+' '+time_of_day
+            full_time_string.replace("  "," ")
+            time_list.append(full_time_string.strip())
     return(time_list)
+
+
 if __name__ == '__main__':
 
     fptr = open('test_lines')
